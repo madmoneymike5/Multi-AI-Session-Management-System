@@ -19,7 +19,7 @@ Inspired by [NetworkChuck's AI terminal workflow](https://www.youtube.com/watch?
 | Claude auto-briefs at session start | `SessionStart` hook reads your project files |
 | Gemini loads project context | Auto-reads `GEMINI.md` from your project root |
 | Codex loads project context | Auto-reads `AGENTS.md` from your project root |
-| DeepSeek/Ollama loads context | `deepseek` shell command pipes `DEEPSEEK.md` as system prompt |
+| DeepSeek/Ollama loads context | `deepseek` shell command injects `DEEPSEEK.md` as system prompt via Modelfile |
 | End-of-session sync | `@agent-session-closer` updates all 4 files + commits to git |
 | Honest quality feedback | `@agent-brutal-critic` reviews your work with zero flattery |
 
@@ -54,6 +54,18 @@ git clone https://github.com/madmoneymike5/Multi-AI-Session-Management-System.gi
 cd Multi-AI-Session-Management-System
 bash install.sh
 ```
+
+### Activating in your current terminal
+
+The installer sets up your shell profile, but **new functions only load when you open a new terminal**. To activate immediately in your current window without reopening:
+
+| Shell | Command |
+|-------|---------|
+| PowerShell | `. $PROFILE` |
+| Git Bash | `source ~/.bash_profile` |
+| CMD | Not supported — open PowerShell instead |
+
+> **Note:** `. $PROFILE` is a PowerShell command. It will fail if you run it in Git Bash. Make sure you're in the right shell before running these.
 
 ### What gets installed
 

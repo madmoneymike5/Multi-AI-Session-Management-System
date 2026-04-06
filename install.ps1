@@ -58,24 +58,24 @@ $settings.hooks | Add-Member -NotePropertyName SessionStart -NotePropertyValue $
 $settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile
 Write-Host "  OK SessionStart hook added to $SettingsFile"
 
-# 4. Add deepseek function to PowerShell profiles
-Write-Host "Adding deepseek function to PowerShell profiles..."
+# 4. Add deepseek function to PowerShell profile
+Write-Host "Adding deepseek function to PowerShell profile..."
 $deepseekFunc = Get-Content "$RepoDir\shell\deepseek.ps1" -Raw
-$profilePaths = @(
-    "$env:USERPROFILE\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1",
-    "$env:USERPROFILE\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-)
-foreach ($profilePath in $profilePaths) {
-    $profileDir = Split-Path -Parent $profilePath
-    New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
-    if (Test-Path $profilePath) {
-        $existing = Get-Content $profilePath -Raw
-        if ($existing -match "function deepseek") {
-            Write-Host "  OK deepseek already in $profilePath -- skipping"
-            continue
-        }
+$profilePath = $PROFILE
+$profileDir = Split-Path -Parent $profilePath
+New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
+if (Test-Path $profilePath) {
+    $existing = Get-Content $profilePath -Raw
+    if ($existing -match "function deepseek") {
+        Write-Host "  OK deepseek already in $profilePath -- skipping"
+    } else {
+        Add-Content -Path $profilePath -Value "`n# DeepSeek/Ollama context loader (added by multi-ai-session-management installer)"
+        Add-Content -Path $profilePath -Value $deepseekFunc
+        Write-Host "  OK deepseek() added to $profilePath"
     }
-    Add-Content -Path $profilePath -Value "`n# DeepSeek/Ollama context loader (added by multi-ai-session-management installer)"
+} else {
+    New-Item -ItemType File -Force -Path $profilePath | Out-Null
+    Add-Content -Path $profilePath -Value "# DeepSeek/Ollama context loader (added by multi-ai-session-management installer)"
     Add-Content -Path $profilePath -Value $deepseekFunc
     Write-Host "  OK deepseek() added to $profilePath"
 }
