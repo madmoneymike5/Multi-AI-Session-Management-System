@@ -66,6 +66,8 @@ The installer sets up your shell profile, but **new functions only load when you
 | CMD | Not supported — open PowerShell instead |
 
 > **Note:** `. $PROFILE` is a PowerShell command. It will fail if you run it in Git Bash. Make sure you're in the right shell before running these.
+>
+> **OneDrive users (common on Windows 11):** If your Documents folder syncs to OneDrive, your PowerShell profile lives at `C:\Users\[you]\OneDrive\Documents\PowerShell\...` not `C:\Users\[you]\Documents\...`. The install script handles this automatically via `$PROFILE` — but if you're editing your profile manually, make sure you're editing the right file. Run `$PROFILE` in PowerShell to see the exact path.
 
 ### What gets installed
 
@@ -116,9 +118,11 @@ Just `cd` into your project and open the tool. They auto-load their context file
 **Starting DeepSeek:**
 ```bash
 cd your-project
-deepseek                    # uses r1:8b by default
-deepseek deepseek-r1:32b    # use a specific model
+deepseek                      # uses deepseek-r1:8b by default
+deepseek deepseek-r1:14b      # use any installed model by name
 ```
+
+The model argument accepts any model name that `ollama list` shows. You must have pulled the model first (`ollama pull modelname`). The default is `deepseek-r1:8b` — change this by editing the `param` line in your shell profile if you want a different default.
 
 **When you want unfiltered feedback:**
 ```

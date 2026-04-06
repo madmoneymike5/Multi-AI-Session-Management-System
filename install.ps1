@@ -3,6 +3,10 @@
 #
 # If you get a script execution policy error, run first:
 #   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+#
+# Note: This script uses $PROFILE to find your PowerShell profile, which correctly
+# resolves to the right path whether your Documents folder is local or synced to
+# OneDrive. You do not need to do anything special for OneDrive setups.
 
 $ErrorActionPreference = "Stop"
 $RepoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
