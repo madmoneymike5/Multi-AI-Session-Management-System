@@ -19,11 +19,16 @@ Read the following in order (skip gracefully if a file doesn't exist):
 
 To find the current project slug: it's the directory name of cwd, URL-encoded. For `C:\Dev\flex-planner`, the slug is `C--Dev-flex-planner`.
 
-## 2. Check for Other AI Updates
+## 2. Check for Other AI Activity
 
+**Check for an active session (WORKING.md):**
+If `WORKING.md` exists in the project root, read it. If the AI listed is not Claude and the timestamp is from today, include a prominent warning in the brief.
+
+**Check for recent updates from other AIs:**
 Check if `GEMINI.md`, `AGENTS.md`, or `DEEPSEEK.md` exist in the project root. If any do:
 - Compare their `Last updated:` date to the most recent Session History date in CLAUDE.md
 - If an AI context file was updated MORE RECENTLY than the last Claude session (meaning Gemini, Codex, or DeepSeek did work after Claude last ran), flag it: "⚠️ GEMINI.md was updated after your last session — Gemini may have made changes. Review before continuing."
+- Also check the `## Last [AI] Session` section at the bottom of each file for a written summary of what that AI did.
 
 ## 3. Deliver the Brief
 
@@ -43,7 +48,8 @@ Good [morning/afternoon]. Here's where we are:
 
 **Blockers:** [None / specific issue]
 
-[If other AI updated context]: ⚠️ [AI name] updated context on [date] — may have done work since last session.
+[If WORKING.md present and recent]: ⚠️ [AI name] appears to be in an active session (started [time]). Coordinate before editing shared files.
+[If other AI updated context since last Claude session]: ⚠️ [AI name] updated context on [date] — [one-line summary from their Last Session section if available].
 
 Ready when you are.
 ```

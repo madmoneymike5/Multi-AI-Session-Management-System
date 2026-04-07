@@ -17,6 +17,13 @@ Analyze the entire conversation. Extract:
 - **Ideas explored but rejected** — and why (important for future sessions)
 - **Next steps** — what should happen next session, in priority order
 
+Also write `WORKING.md` in the project root to signal that Claude is in an active close:
+```
+AI: Claude
+Started: [current date and time]
+Focus: Closing session
+```
+
 ## 2. Update `docs/next-session.md`
 
 Read the current `docs/next-session.md`. Then:
@@ -87,7 +94,24 @@ Last updated: [DATE] by session-closer
 
 At the start of your session, read this file fully. Then check if CLAUDE.md or docs/next-session.md have newer information.
 
-At the END of your session, update the `## Last [AI Name] Session` section below before closing:
+### Session Protocol
+
+**When you start working:**
+1. Write `WORKING.md` in the project root with your name, the current time, and what you're focused on:
+   ```
+   AI: Gemini
+   Started: [date and time]
+   Focus: [what you're working on]
+   ```
+2. If `WORKING.md` already exists with another AI's name and a recent timestamp (same day), stop and tell the user: another AI may be in an active session. Ask whether to proceed or coordinate first.
+
+**When you finish working:**
+1. Update the `## Last [AI Name] Session` section below with a summary of what you did.
+2. Delete `WORKING.md` from the project root.
+
+Note: `WORKING.md` is a soft signal, not a hard lock. If two AIs truly need to work on the same files at the same time, the right approach is to use separate git branches and merge when done.
+
+---
 
 ## Last Gemini Session
 _Not yet used_
@@ -125,10 +149,14 @@ Decisions:
 
 State: [one-line status]
 Next: [one-line next step]"
-git push
 ```
 
-If `git push` fails because no remote is configured, report the error clearly and provide the `gh repo create` command to fix it. Do not fail silently.
+After committing, ask the user: **"Ready to push to GitHub? Say yes to push now, or no to commit locally only."**
+
+- If yes: run `git push`. If it fails because no remote is configured, report the error clearly and provide the `gh repo create` command to fix it. Do not fail silently.
+- If no: skip the push and note it in the confirmation message.
+
+Then delete `WORKING.md` from the project root.
 
 ## 7. Deliver Confirmation
 
@@ -141,7 +169,7 @@ Session [N] Summary: [one sentence — what was the theme of this session]
 
 Project Status: [one sentence — honest current state]
 
-All changes committed and pushed. You're all set.
+All changes committed [and pushed / locally only — run 'git push' when ready]. You're all set.
 ```
 
 ---
