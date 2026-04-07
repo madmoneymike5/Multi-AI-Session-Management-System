@@ -51,15 +51,15 @@ README.md        → Public documentation
 ## Current State
 - Phase: Post-release bug fixes
 - Last session: 2026-04-06
-- Status: DeepSeek PowerShell function confirmed working; install.ps1 fixed for OneDrive; ready to push to GitHub
-- Blocked on: Nothing — ready to push and test on clean machine
+- Status: DeepSeek PowerShell function confirmed working; install.ps1 fixed for OneDrive; pushed to GitHub
+- Blocked on: Nothing — next is testing install scripts on a clean machine
 
 ## Session History
 
 ### Session 2026-04-06 (second)
 - Accomplished: Fixed DeepSeek PowerShell integration — confirmed working end-to-end; fixed install.ps1 profile path for OneDrive; removed 2>$null from ollama calls; created PowerShell profile at correct OneDrive path
 - Decisions: Switch Ollama approach from --system flag to temp Modelfile (ollama create/rm); use $PROFILE not hardcoded path; never redirect stderr to null for Go CLI tools on Windows; SessionStart hook error was transient (no config change needed)
-- Next: Push to GitHub, test install scripts on a clean machine
+- Next: Test install scripts on a clean machine (GitHub push already done)
 
 ### Session 2026-04-06
 - Accomplished: Created full repo structure — agents, commands, shell functions, install scripts (bash + PowerShell), README, AI context files, CLAUDE.md

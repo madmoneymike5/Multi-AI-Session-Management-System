@@ -2,7 +2,7 @@
 
 ## Current Priority
 
-Push to GitHub and verify install scripts work correctly on a clean machine.
+Test install scripts on a clean machine.
 
 ---
 
@@ -13,13 +13,14 @@ Push to GitHub and verify install scripts work correctly on a clean machine.
 - [x] Fixed install.ps1 profile path — uses $PROFILE instead of hardcoded $env:USERPROFILE\Documents path (fixes OneDrive setups)
 - [x] Removed 2>$null from ollama calls — Go CLI programs on Windows throw "failed to get console mode for stderr: The handle is invalid" when stderr is null
 - [x] Confirmed DeepSeek is working end-to-end on Windows with OneDrive profile
+- [x] Pushed to GitHub — repo is live
 
 ---
 
 ## Work Queue
 
-### Task 1 — Push to GitHub
-> Create the public GitHub repo and push. Verify the README renders correctly and the install commands in it work.
+### Task 1 — Test install.ps1 on a clean Windows machine
+> ~~Push to GitHub~~ (done). Run `.\install.ps1` on a Windows machine without anything pre-installed. Verify:
 
 ### Task 2 — Test install.ps1 on a clean Windows machine
 > Run `.\install.ps1` on a Windows machine without anything pre-installed. Verify:
