@@ -50,7 +50,7 @@ These triggers apply at ANY point in the conversation, not just the first messag
 **Greeting trigger → run session-opener (with mid-session guard)**
 If the user's message is a greeting ("good morning", "morning", "hi", "hello", "hey", "good afternoon", "good evening", "I'm back"):
 
-1. **First, check whether you are already mid-session** — i.e., this conversation has substantive prior turns, files have been read, edits have been made, or context has accumulated beyond the initial SessionStart brief.
+1. **First, check whether you are already mid-session** — i.e., this conversation has substantive prior turns, files have been read, edits have been made, or context has accumulated beyond an initial greeting/briefing exchange.
 2. **If mid-session:** Do NOT silently re-run session-opener. Instead, tell the user: "We're already mid-session — I have context loaded including [one-line summary of what we've been doing]. Want to `/clear` and get a fresh start-of-day briefing, or keep going from here? (You can also abort and just continue.)" Wait for their answer. The user must run `/clear` themselves — you cannot clear context for them. After they clear and greet again, the next turn will be a fresh session and the start-of-session branch below applies.
 3. **If this is genuinely the start of the session** (first or second turn, no real work done yet): launch the `session-opener` agent via the Agent tool, then greet the user in the same response that delivers the brief.
 4. **If session-opener has already run in this conversation** and no new context files have been touched since: just greet back briefly. Don't re-brief.
@@ -231,7 +231,8 @@ Created:
   ✓ docs/next-session.md
   ✓ ~/.claude/projects/[slug]/memory/ (Claude memory directory)
 
-All AI tools are ready. Claude auto-briefs via SessionStart hook.
+All AI tools are ready. Greet Claude ("good morning", "hi") and the greeting
+trigger in CLAUDE.md will run the session-opener agent to brief you.
 Gemini and Codex auto-load their files. DeepSeek: run `deepseek` from this directory.
 
 Run `@agent-session-closer` at the end of each session.

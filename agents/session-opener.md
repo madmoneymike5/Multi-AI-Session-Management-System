@@ -1,6 +1,6 @@
 ---
 name: session-opener
-description: "Morning/session-start briefing. Reads memory files, docs/next-session.md, and CLAUDE.md to brief the user on current project state, what's next, and any blockers. Also checks if other AIs updated context files since last Claude session. Invoked automatically via SessionStart hook, or manually with '@agent-session-opener'."
+description: "Morning/session-start briefing. Reads memory files, docs/next-session.md, and CLAUDE.md to brief the user on current project state, what's next, and any blockers. Also checks if other AIs updated context files since last Claude session. Invoked by the greeting trigger in CLAUDE.md (when the user says 'good morning', 'hi', etc.) or manually via '@agent-session-opener'."
 model: sonnet
 ---
 

@@ -2,10 +2,9 @@
 
 ## Current Priority
 
-1. Quit and relaunch Claude Code — verify "SessionStart:startup hook error" is gone and the new briefing context appears cleanly.
-2. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer).
-3. Fix the 9 brutal-critic bugs queued below.
-4. Test install scripts on a clean machine.
+1. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer).
+2. Fix the remaining brutal-critic bugs queued below.
+3. Test install scripts on a clean machine.
 
 ---
 
@@ -22,21 +21,14 @@
 - [x] Mirrored Session Triggers into commands/init-project.md so new projects inherit the behavior
 - [x] Fixed duplicate Task 1/Task 2 stub in next-session.md
 - [x] Fixed "SessionStart:startup hook error" on Windows — converted invalid `type: prompt` hook to `type: command` via ~/.claude/session-start-hook.ps1; fixed PSObject bloat and em-dash mojibake bugs during testing
+- [x] **Removed SessionStart auto-brief hook entirely** (2026-04-07 third session) — the hook fired but `additionalContext` is background context, not an imperative, so the briefing never appeared. Decided the greeting trigger in CLAUDE.md is sufficient and the ~30s launch tax of an always-on hook isn't worth it. Deleted `settings/` dir, hook fragment, hook script, context file; ripped out hook section from install.sh / install.ps1; updated README, CLAUDE.md, agents/session-opener.md, commands/init-project.md. Also retired Bug 1 and Bug 6 from the brutal-critic list — both were about the now-deleted hook code.
 
 ---
 
 ## Work Queue
 
-### Task 0a — Verify SessionStart hook fix (IMMEDIATE — do this first)
-> Quit Claude Code and relaunch it in this repo. Verify:
-> - The "SessionStart:startup hook error" banner is gone
-> - The briefing context (from ~/.claude/session-start-context.txt) appears in Claude's initial context
-> - No 374KB JSON blobs or mojibake in the hook output
->
-> If still broken: check ~/.claude/settings.json has `"type": "command"` (not `"type": "prompt"`) and the `command` field points to `pwsh -File ~/.claude/session-start-hook.ps1`.
-
-### Task 0b — Test Session Triggers on a fresh session restart
-> After verifying Task 0a, greet Claude with "good morning" or "hi".
+### Task 0 — Test Session Triggers on a fresh session restart
+> Greet Claude with "good morning" or "hi".
 > Verify:
 > - session-opener runs automatically
 > - The briefing is delivered before any other response
@@ -49,8 +41,8 @@
 > Run `.\install.ps1` on a Windows machine without anything pre-installed. Verify:
 > - PowerShell profile gets the deepseek function at the correct path (OneDrive or local)
 > - Agents are copied to ~/.claude/agents/
-> - Hook is added correctly to settings.json
 > - `deepseek` command works after `. $PROFILE`
+> - settings.json is NOT touched (no hook is installed anymore)
 
 ### Task 3 — Test install.sh on Linux/macOS
 > Run `bash install.sh` on a fresh Linux or macOS machine. Verify all files land in correct locations and settings.json is correctly merged.
@@ -62,9 +54,9 @@
 
 ## Bugs Found by Brutal Critic (2026-04-07)
 
-### Bug 1 — install.sh / install.ps1 overwrite existing hooks instead of merging
-> Both installers replace the entire `SessionStart` array in settings.json rather than appending. Users with pre-existing hooks lose them silently on re-install.
-> Fix: Read the existing array first. If the hook is already present, skip. Otherwise append — don't replace.
+### ~~Bug 1~~ — RETIRED 2026-04-07 (third session)
+> Was: install.sh / install.ps1 overwrite existing SessionStart hooks instead of merging.
+> Resolution: Both installers no longer touch settings.json at all — the SessionStart hook was removed in favor of the greeting trigger in CLAUDE.md.
 
 ### Bug 2 — README describes brutal-critic personalities that no longer exist
 > README says "Paranoid Architect, Code Assassin, Product Skeptic." Those names were replaced by the 27-type Personality Library. Public docs lie about actual behavior.
@@ -82,9 +74,9 @@
 > Stages everything in the working directory including secrets, .env files, and debug artifacts. The agent runs in users' actual project directories — this is a data exposure risk.
 > Fix: Replace with an explicit file list: `git add CLAUDE.md GEMINI.md AGENTS.md DEEPSEEK.md docs/next-session.md WORKING.md`
 
-### Bug 6 — Hook prompt text hardcoded in three places with no single source of truth
-> install.sh, install.ps1, and settings/hook-fragment.json each have slightly different copies of the hook prompt. One change requires three updates, and they are already out of sync.
-> Fix: Have install.sh and install.ps1 read the prompt from hook-fragment.json. That file exists for this purpose.
+### ~~Bug 6~~ — RETIRED 2026-04-07 (third session)
+> Was: hook prompt text hardcoded in three places (install.sh, install.ps1, settings/hook-fragment.json) with no single source of truth.
+> Resolution: All three locations were deleted along with the hook itself. There is no hook prompt anymore.
 
 ### Bug 7 — GEMINI.md / AGENTS.md / DEEPSEEK.md have stale "ready to push" state
 > These context files still say "ready to push to GitHub" — the push is done. This is the sync failure this system exists to prevent, happening in its own repo.

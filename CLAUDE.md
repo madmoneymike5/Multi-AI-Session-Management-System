@@ -23,9 +23,6 @@ shell/           → Shell functions
   deepseek.sh    → bash (Git Bash, Linux, macOS)
   deepseek.ps1   → PowerShell (Windows)
 
-settings/        → Claude Code settings fragment
-  hook-fragment.json
-
 install.sh       → One-command bash installer
 install.ps1      → One-command PowerShell installer
 README.md        → Public documentation
@@ -39,8 +36,7 @@ README.md        → Public documentation
 - **Ollama uses temp Modelfile (ollama create), not --system flag** — more reliable; --system flag was replaced this session
 - **install.ps1 uses $PROFILE for profile path** — not hardcoded $env:USERPROFILE\Documents, which breaks on OneDrive-synced machines
 - **No 2>$null on ollama calls in PowerShell** — Go-based CLI programs on Windows throw "failed to get console mode for stderr: The handle is invalid" when stderr is redirected to null
-- **Claude Code SessionStart hooks require `type: "command"`, not `type: "prompt"`** — the harness only supports command hooks; use a .ps1/.sh script to emit `hookSpecificOutput` JSON with `additionalContext`
-- **Cast Get-Content to [string] before ConvertTo-Json** — PowerShell's Get-Content attaches PSObject note-properties (PSPath, PSDrive, etc.) that ConvertTo-Json expands into hundreds of KB; `[string](Get-Content ...)` strips them
+- **No SessionStart auto-brief hook** — we tried it (twice). The launch tax (~30s on every startup, even when you don't need a brief) outweighed the benefit, and `additionalContext` from a hook is treated as background context, not as an instruction the model reliably acts on. The greeting trigger in this file is the chosen mechanism — it runs `session-opener` only when the user actually says "good morning" / "hi" / etc. If you find yourself tempted to re-add the hook, re-read this bullet. (Historical Claude Code knowledge worth keeping anyway: if you ever DO write a SessionStart hook, it must be `type: "command"` not `type: "prompt"`, the command string is not shell-expanded so `%USERPROFILE%` won't work without `cmd /c`, and Get-Content output must be cast to `[string]` before ConvertTo-Json or PSObject note-properties will inflate the JSON.)
 
 ## Session Triggers
 
@@ -49,7 +45,7 @@ These triggers apply at ANY point in the conversation, not just the first messag
 **Greeting trigger → run session-opener (with mid-session guard)**
 If the user's message is a greeting ("good morning", "morning", "hi", "hello", "hey", "good afternoon", "good evening", "I'm back"):
 
-1. **First, check whether you are already mid-session** — i.e., this conversation has substantive prior turns, files have been read, edits have been made, or context has accumulated beyond the initial SessionStart brief.
+1. **First, check whether you are already mid-session** — i.e., this conversation has substantive prior turns, files have been read, edits have been made, or context has accumulated beyond an initial greeting/briefing exchange.
 2. **If mid-session:** Do NOT silently re-run session-opener. Instead, tell the user: "We're already mid-session — I have context loaded including [one-line summary of what we've been doing]. Want to `/clear` and get a fresh start-of-day briefing, or keep going from here? (You can also abort and just continue.)" Wait for their answer. The user must run `/clear` themselves — you cannot clear context for them. After they clear and greet again, the next turn will be a fresh session and the start-of-session branch below applies.
 3. **If this is genuinely the start of the session** (first or second turn, no real work done yet): launch the `session-opener` agent via the Agent tool, then greet the user in the same response that delivers the brief.
 4. **If session-opener has already run in this conversation** and no new context files have been touched since: just greet back briefly. Don't re-brief.
@@ -70,12 +66,17 @@ These triggers exist because this repo IS the session management system — it m
 ---
 
 ## Current State
-- Phase: Post-release bug fixes + SessionStart hook fix
-- Last session: 2026-04-07
-- Status: Fixed SessionStart hook error on Windows — converted invalid `type: prompt` hook to `type: command` via a PowerShell script; all changes in ~/.claude/ (outside repo); 9 brutal-critic bugs still queued; no push
-- Blocked on: Verify fix by quitting and relaunching Claude Code — "SessionStart:startup hook error" should be gone
+- Phase: Post-release bug fixes + simplification
+- Last session: 2026-04-07 (third)
+- Status: Removed the SessionStart auto-brief hook entirely from both personal `~/.claude/` and the repo. Briefing now happens only via the greeting trigger in this file. Bug 1 and Bug 6 from the brutal-critic list retired (both were about hook code that no longer exists). 7 brutal-critic bugs still queued. No push.
+- Blocked on: Nothing
 
 ## Session History
+
+### Session 2026-04-07 (third)
+- Accomplished: Diagnosed why the SessionStart hook fired without error but produced no briefing — `additionalContext` from a hook is delivered as background context, not as a reliable imperative for the model. Decided to remove the hook entirely rather than try to make it more imperative. Deleted `~/.claude/session-start-hook.ps1`, `~/.claude/session-start-context.txt`, and the SessionStart block from `~/.claude/settings.json`. In the repo: deleted `settings/` directory (hook fragment, hook script, context file), ripped out the hook installation section from both `install.sh` and `install.ps1`, dropped the `node`/`python3` prerequisite line from README, updated the README feature table / install tree / update table / daily workflow / manual install / repo structure / prerequisites sections, updated `agents/session-opener.md` description, updated `commands/init-project.md` boilerplate output, retired Bug 1 and Bug 6 from `docs/next-session.md`.
+- Decisions: **No SessionStart auto-brief hook, ever.** The launch tax (~30s on every startup) is not worth paying when the greeting trigger handles the same job opt-in. `additionalContext` is background info, not an instruction. The greeting trigger in CLAUDE.md is the canonical session-briefing mechanism. Earlier-session knowledge about hook quirks (`type: command` not `prompt`, no shell expansion of env vars, `[string]` cast for Get-Content) preserved as historical context in the Key Design Decisions bullet, in case anyone is ever tempted to re-add it.
+- Next: Test the greeting trigger on a fresh restart; resume remaining 7 brutal-critic bugs; clean-machine install testing.
 
 ### Session 2026-04-07 (second)
 - Accomplished: Fixed "SessionStart:startup hook error" on Windows — root cause was `type: "prompt"` in settings.json which is not a valid Claude Code hook type; converted to `type: "command"` via a new PowerShell script (~/.claude/session-start-hook.ps1) that reads briefing prose from ~/.claude/session-start-context.txt and emits `hookSpecificOutput` JSON; fixed two bugs during testing (PSObject note-property bloat in ConvertTo-Json, em-dash mojibake from system codepage)

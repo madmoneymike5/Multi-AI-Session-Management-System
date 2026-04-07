@@ -16,7 +16,7 @@ Inspired by [NetworkChuck's AI terminal workflow](https://www.youtube.com/watch?
 
 | What | How |
 |------|-----|
-| Claude auto-briefs at session start | `SessionStart` hook reads your project files |
+| Claude briefs you when greeted | Greeting trigger in `CLAUDE.md` launches `session-opener` on "good morning" / "hi" |
 | Gemini loads project context | Auto-reads `GEMINI.md` from your project root |
 | Codex loads project context | Auto-reads `AGENTS.md` from your project root |
 | DeepSeek/Ollama loads context | `deepseek` shell command injects `DEEPSEEK.md` as system prompt via Modelfile |
@@ -30,7 +30,6 @@ Inspired by [NetworkChuck's AI terminal workflow](https://www.youtube.com/watch?
 - [Claude Code CLI](https://claude.ai/code) — required
 - [Ollama](https://ollama.com) + a DeepSeek model — optional, only needed for DeepSeek support
 - Git — for session commit/push feature
-- `node` or `python3` — for the install script to merge `settings.json`
 
 ---
 
@@ -79,9 +78,6 @@ The installer sets up your shell profile, but **new functions only load when you
 
 ~/.claude/commands/
   init-project.md      ← new project bootstrapper
-
-~/.claude/settings.json
-  SessionStart hook    ← auto-brief on every session open
 
 ~/.bashrc / PowerShell $PROFILE
   deepseek()           ← Ollama wrapper with auto-context loading
@@ -132,7 +128,6 @@ The installer is designed to be safe to run more than once:
 | Claude agents (`session-closer`, `session-opener`, `brutal-critic`) | ✅ Always — replaced with the latest version |
 | `/init-project` command | ✅ Always — replaced with the latest version |
 | `deepseek` shell function | ✅ Only if it isn't already in your profile |
-| `settings.json` SessionStart hook | ✅ Only if it isn't already present |
 | Your project files (`CLAUDE.md`, `GEMINI.md`, etc.) | ❌ Never touched |
 | Your git history or any work in your projects | ❌ Never touched |
 
@@ -160,7 +155,7 @@ It's safe to run on a project you've already been working on. If a `CLAUDE.md` a
 ### Daily workflow
 
 **Morning (session start):**
-Claude briefs you automatically. No prompt needed.
+Greet Claude — "good morning", "hi", "hey" — and the greeting trigger in `CLAUDE.md` will launch the `session-opener` agent to brief you. No briefing happens until you greet, so launches stay fast when you don't need a brief.
 
 **During the day:**
 Work normally. Use whichever AI tool fits the task.
@@ -221,7 +216,6 @@ This system is designed around sequential use — one AI working at a time. If y
 agents/          → install to ~/.claude/agents/
 commands/        → install to ~/.claude/commands/
 shell/           → shell functions for bash and PowerShell
-settings/        → settings.json hook fragment (for manual install)
 install.sh       → bash installer
 install.ps1      → PowerShell installer
 ```
@@ -234,8 +228,7 @@ If you prefer not to run the install script:
 
 1. Copy `agents/*.md` to `~/.claude/agents/`
 2. Copy `commands/*.md` to `~/.claude/commands/`
-3. Merge the `hooks` block from `settings/hook-fragment.json` into `~/.claude/settings.json`
-4. Add the function from `shell/deepseek.sh` to your `~/.bashrc`, or `shell/deepseek.ps1` to your PowerShell `$PROFILE`
+3. Add the function from `shell/deepseek.sh` to your `~/.bashrc`, or `shell/deepseek.ps1` to your PowerShell `$PROFILE`
 
 ---
 

@@ -14,23 +14,21 @@ A distributable toolkit for keeping Claude, Gemini, Codex, and DeepSeek in sync 
 agents/          → Claude Code personal agents (install to ~/.claude/agents/)
 commands/        → Claude Code personal commands (install to ~/.claude/commands/)
 shell/           → Shell functions for DeepSeek/Ollama (bash + PowerShell)
-settings/        → Claude Code settings fragment (SessionStart hook)
 install.sh       → One-command bash installer (Linux/macOS/Git Bash)
 install.ps1      → One-command PowerShell installer (Windows)
 ```
 
 ## Current State
-- Phase: Post-release bug fixes + SessionStart hook fix
-- Last session: 2026-04-07
-- Status: Fixed SessionStart hook error on Windows — converted invalid `type: prompt` hook to `type: command` via a PowerShell script; all changes in ~/.claude/ (outside repo); 9 brutal-critic bugs still queued; no push
-- Blocked on: Verify fix by quitting and relaunching Claude Code — "SessionStart:startup hook error" should be gone
+- Phase: Post-release bug fixes + simplification
+- Last session: 2026-04-07 (third)
+- Status: Removed the SessionStart auto-brief hook entirely from both personal `~/.claude/` and the repo. Briefing now happens only via the greeting trigger in CLAUDE.md. Bug 1 and Bug 6 from the brutal-critic list retired (both were about hook code that no longer exists). 7 brutal-critic bugs still queued. No push.
+- Blocked on: Nothing
 
 ## What's Next
-1. Quit and relaunch Claude Code to verify "SessionStart:startup hook error" is gone
-2. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer)
-3. Fix the 9 brutal-critic bugs queued in docs/next-session.md
-4. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive)
-5. Test install.sh on Linux/macOS
+1. Test the greeting trigger on a fresh session restart (say "good morning" → session-opener should run; say "goodnight" → session-closer should run)
+2. Fix the remaining 7 brutal-critic bugs queued in docs/next-session.md (Bugs 2, 3, 4, 5, 7, 8, and 9 — Bugs 1 and 6 are retired)
+3. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive); confirm settings.json is NOT touched anymore
+4. Test install.sh on Linux/macOS
 
 ## Key Design Decisions (Do Not Revisit Without Good Reason)
 - Agents are personal (`~/.claude/agents/`), not project-level
@@ -38,40 +36,41 @@ install.ps1      → One-command PowerShell installer (Windows)
 - Ollama uses temp Modelfile (ollama create/rm), NOT --system flag — more reliable
 - install.ps1 uses `$PROFILE` not hardcoded `$env:USERPROFILE\Documents` — fixes OneDrive setups
 - No `2>$null` on ollama calls in PowerShell — Go CLI programs on Windows break when stderr is redirected to null
-- install.sh merges settings.json using node or python3 (no jq dependency)
 - Session Triggers implemented in CLAUDE.md (reloaded every turn), NOT via UserPromptSubmit hook — simpler, version-controlled, no settings.json changes needed
-- SessionStart hook stays as-is; Session Triggers are a separate layer on top
-- Claude Code SessionStart hooks require `type: "command"`, not `type: "prompt"` — use a .ps1/.sh script to emit `hookSpecificOutput` JSON with `additionalContext`
-- Cast Get-Content to `[string]` before ConvertTo-Json — PSObject note-properties (PSPath, PSDrive, etc.) otherwise expand into hundreds of KB
+- **No SessionStart auto-brief hook, ever.** Tried twice, removed for good. The launch tax (~30s on every startup, even when no brief is needed) is not worth paying when the greeting trigger handles the same job opt-in. Also, `additionalContext` from a SessionStart hook is treated as background context, not as a reliable instruction the model acts on. The greeting trigger in CLAUDE.md is the canonical mechanism.
 
 ## What We Are NOT Doing Yet
 - Web UI or dashboard
 - Auto-update mechanism for installed agents
 - Support for tools without a CLI
 - Packaging as npm/pip (future roadmap)
+- SessionStart auto-brief hook (intentionally removed — see Key Design Decisions)
 
 ## Last Session Summary
 
-**Session 2026-04-07 (second)**
+**Session 2026-04-07 (third)**
 
-Investigated and fixed the "SessionStart:startup hook error" that appeared on every Claude Code launch.
+Diagnosed why the SessionStart hook fired without error but produced no briefing — `additionalContext` from a hook is delivered as background context, not as a reliable imperative for the model. Decided to remove the hook entirely rather than try to make it more imperative.
 
-Root cause: ~/.claude/settings.json had a SessionStart hook with `"type": "prompt"`, which is not a valid Claude Code hook type. Only `"type": "command"` is supported. The harness rejected it at startup silently with the error banner.
+Removed from personal `~/.claude/`:
+- `session-start-hook.ps1`
+- `session-start-context.txt`
+- The SessionStart block from `settings.json`
 
-Fix (all in ~/.claude/, outside the repo — no repo files changed this session):
-- Created ~/.claude/session-start-context.txt — holds the briefing instruction prose
-- Created ~/.claude/session-start-hook.ps1 — reads the context file and emits `hookSpecificOutput` JSON with `additionalContext`
-- Edited ~/.claude/settings.json — converted hook to `type: "command"` pointing at the .ps1
+Removed from the repo:
+- `settings/` directory (hook fragment, hook script, context file — all three files plus the dir itself)
+- The hook installation section from both `install.sh` and `install.ps1`
+- The `node`/`python3` prerequisite line from README (no JSON merge needed anymore)
+- All SessionStart references in README (feature table, install tree, update table, daily workflow morning section, manual install steps, repo structure)
+- The "auto-briefs via SessionStart hook" line from `commands/init-project.md`
+- The "Invoked automatically via SessionStart hook" phrase from `agents/session-opener.md` description
+- Bug 1 and Bug 6 from `docs/next-session.md` (both retired — they described problems with hook code that no longer exists)
 
-Two bugs were caught during testing before declaring done:
-1. `Get-Content -Raw` attached PSObject note-properties (PSPath, PSDrive, etc.) that ConvertTo-Json expanded into a 374KB blob. Fixed with `[string]` cast.
-2. Em-dash mojibake from system codepage. Fixed with `-Encoding utf8`.
+Updated CLAUDE.md, GEMINI.md, AGENTS.md, DEEPSEEK.md to reflect the new "no hook" reality, with a strong "do not re-add this" note in Key Design Decisions.
 
-Script now produces clean single-string `additionalContext` JSON. Hook fix is Windows-only (PowerShell), but lives in personal ~/.claude/ so it has zero impact on Linux/Mac users installing MAISMS.
+Decisions: **No SessionStart auto-brief hook, ever.** The greeting trigger in CLAUDE.md is the canonical session-briefing mechanism. Earlier-session knowledge about hook quirks (`type: command` not `prompt`, no shell expansion of env vars, `[string]` cast for Get-Content) preserved as historical context in CLAUDE.md, in case anyone is ever tempted to re-add it.
 
-Decisions: Claude Code SessionStart hooks only support `type: "command"`; the prose-in-.txt / script-wraps-to-JSON / settings-points-at-script pattern is clean and recommended for Windows; always cast Get-Content to [string] before ConvertTo-Json.
-
-Next immediate step: quit and relaunch Claude Code to confirm the error banner is gone.
+Next immediate step: test the greeting trigger on a fresh restart and confirm it briefs correctly without any launch-time tax.
 
 ---
 

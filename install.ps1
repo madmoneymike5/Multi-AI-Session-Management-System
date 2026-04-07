@@ -13,7 +13,6 @@ $RepoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ClaudeDir = "$env:USERPROFILE\.claude"
 $AgentsDir = "$ClaudeDir\agents"
 $CommandsDir = "$ClaudeDir\commands"
-$SettingsFile = "$ClaudeDir\settings.json"
 
 Write-Host ""
 Write-Host "Multi-AI Session Management System -- Installer (PowerShell)"
@@ -34,35 +33,12 @@ New-Item -ItemType Directory -Force -Path $CommandsDir | Out-Null
 Copy-Item "$RepoDir\commands\*.md" $CommandsDir -Force
 Write-Host "  OK init-project.md     -> $CommandsDir"
 
-# 3. Merge SessionStart hook into settings.json
-Write-Host "Configuring Claude Code SessionStart hook..."
-New-Item -ItemType Directory -Force -Path $ClaudeDir | Out-Null
-if (-not (Test-Path $SettingsFile)) {
-    '{}' | Set-Content $SettingsFile
-}
+# NOTE: There is intentionally no SessionStart auto-brief hook. We chose the
+# greeting trigger in CLAUDE.md instead — it adds ~30s to launch only when
+# invited (when the user actually says "good morning" / "hi"), instead of
+# taxing every single launch. See CLAUDE.md "Session Triggers" section.
 
-$hookPrompt = "A new Claude Code session has just started. Before responding to the user's first message, silently act as the session-opener agent: (1) read the memory index at ~/.claude/projects/[current-project-slug]/memory/MEMORY.md and any files it references, (2) read docs/next-session.md if it exists in the current project, (3) read the '## Current State' section and the most recent 2 entries in '## Session History' from CLAUDE.md if it exists. The project slug is the cwd path with slashes replaced by dashes and colons removed. Then deliver a brief status update covering: current phase, last session summary, top 3 next items, and any blockers. If no context files are found, say so honestly."
-
-$settings = Get-Content $SettingsFile -Raw | ConvertFrom-Json
-if (-not $settings.hooks) {
-    $settings | Add-Member -NotePropertyName hooks -NotePropertyValue ([PSCustomObject]@{})
-}
-$hookEntry = @(
-    [PSCustomObject]@{
-        matcher = "*"
-        hooks = @(
-            [PSCustomObject]@{
-                type = "prompt"
-                prompt = $hookPrompt
-            }
-        )
-    }
-)
-$settings.hooks | Add-Member -NotePropertyName SessionStart -NotePropertyValue $hookEntry -Force
-$settings | ConvertTo-Json -Depth 10 | Set-Content $SettingsFile
-Write-Host "  OK SessionStart hook added to $SettingsFile"
-
-# 4. Add deepseek function to PowerShell profile
+# 3. Add deepseek function to PowerShell profile
 Write-Host "Adding deepseek function to PowerShell profile..."
 $deepseekFunc = Get-Content "$RepoDir\shell\deepseek.ps1" -Raw
 $profilePath = $PROFILE
@@ -90,7 +66,6 @@ Write-Host ""
 Write-Host "What was installed:"
 Write-Host "  ~/.claude/agents/    -- session-closer, session-opener, brutal-critic"
 Write-Host "  ~/.claude/commands/  -- init-project"
-Write-Host "  ~/.claude/settings.json -- SessionStart auto-brief hook"
 Write-Host "  PowerShell profiles  -- deepseek() function"
 Write-Host ""
 Write-Host "To activate in this terminal:  . `$PROFILE"
