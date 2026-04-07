@@ -39,6 +39,8 @@ README.md        → Public documentation
 - **Ollama uses temp Modelfile (ollama create), not --system flag** — more reliable; --system flag was replaced this session
 - **install.ps1 uses $PROFILE for profile path** — not hardcoded $env:USERPROFILE\Documents, which breaks on OneDrive-synced machines
 - **No 2>$null on ollama calls in PowerShell** — Go-based CLI programs on Windows throw "failed to get console mode for stderr: The handle is invalid" when stderr is redirected to null
+- **Claude Code SessionStart hooks require `type: "command"`, not `type: "prompt"`** — the harness only supports command hooks; use a .ps1/.sh script to emit `hookSpecificOutput` JSON with `additionalContext`
+- **Cast Get-Content to [string] before ConvertTo-Json** — PowerShell's Get-Content attaches PSObject note-properties (PSPath, PSDrive, etc.) that ConvertTo-Json expands into hundreds of KB; `[string](Get-Content ...)` strips them
 
 ## Session Triggers
 
@@ -68,12 +70,17 @@ These triggers exist because this repo IS the session management system — it m
 ---
 
 ## Current State
-- Phase: Post-release bug fixes + Session Triggers feature
+- Phase: Post-release bug fixes + SessionStart hook fix
 - Last session: 2026-04-07
-- Status: Session Triggers added to CLAUDE.md and init-project.md; brutal-critic ran and found 9 bugs all queued in next-session.md; local commit only (no push)
-- Blocked on: Nothing — immediate next step is testing Session Triggers on a fresh session restart
+- Status: Fixed SessionStart hook error on Windows — converted invalid `type: prompt` hook to `type: command` via a PowerShell script; all changes in ~/.claude/ (outside repo); 9 brutal-critic bugs still queued; no push
+- Blocked on: Verify fix by quitting and relaunching Claude Code — "SessionStart:startup hook error" should be gone
 
 ## Session History
+
+### Session 2026-04-07 (second)
+- Accomplished: Fixed "SessionStart:startup hook error" on Windows — root cause was `type: "prompt"` in settings.json which is not a valid Claude Code hook type; converted to `type: "command"` via a new PowerShell script (~/.claude/session-start-hook.ps1) that reads briefing prose from ~/.claude/session-start-context.txt and emits `hookSpecificOutput` JSON; fixed two bugs during testing (PSObject note-property bloat in ConvertTo-Json, em-dash mojibake from system codepage)
+- Decisions: Claude Code SessionStart hooks only support `type: "command"`, never `type: "prompt"`; pattern for Windows command hooks is prose in .txt → .ps1 reads it and wraps in JSON → settings.json points at .ps1; always cast Get-Content output to [string] before ConvertTo-Json to strip PSObject metadata; all changes in personal ~/.claude/ — zero repo changes this session
+- Next: Quit and relaunch Claude Code to verify hook error is gone; then resume 9 brutal-critic bugs from next-session.md and clean-machine install testing
 
 ### Session 2026-04-07
 - Accomplished: Ran brutal-critic — found 9 issues, all added to docs/next-session.md; implemented Session Triggers feature in CLAUDE.md (greeting/goodbye detection with mid-session guard); mirrored Session Triggers into commands/init-project.md so new projects inherit the behavior automatically; fixed duplicate Task 1/Task 2 stub in next-session.md

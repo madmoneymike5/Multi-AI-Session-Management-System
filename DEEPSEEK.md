@@ -20,17 +20,17 @@ install.ps1      → One-command PowerShell installer (Windows)
 ```
 
 ## Current State
-- Phase: Post-release bug fixes + Session Triggers feature
+- Phase: Post-release bug fixes + SessionStart hook fix
 - Last session: 2026-04-07
-- Status: Session Triggers added to CLAUDE.md and init-project.md; brutal-critic ran and found 8 bugs all queued in next-session.md; local commit only (no push)
-- Blocked on: Nothing — immediate next step is testing Session Triggers on a fresh session restart
+- Status: Fixed SessionStart hook error on Windows — converted invalid `type: prompt` hook to `type: command` via a PowerShell script; all changes in ~/.claude/ (outside repo); 9 brutal-critic bugs still queued; no push
+- Blocked on: Verify fix by quitting and relaunching Claude Code — "SessionStart:startup hook error" should be gone
 
 ## What's Next
-1. Test Session Triggers on a fresh session restart (greeting → session-opener, goodbye → session-closer)
-2. Fix the 8 brutal-critic bugs queued in docs/next-session.md
-3. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive)
-4. Test install.sh on Linux/macOS
-5. Consider a thin `gemini` shell wrapper (low priority)
+1. Quit and relaunch Claude Code to verify "SessionStart:startup hook error" is gone
+2. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer)
+3. Fix the 9 brutal-critic bugs queued in docs/next-session.md
+4. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive)
+5. Test install.sh on Linux/macOS
 
 ## Key Design Decisions (Do Not Revisit Without Good Reason)
 - Agents are personal (`~/.claude/agents/`), not project-level
@@ -41,6 +41,8 @@ install.ps1      → One-command PowerShell installer (Windows)
 - install.sh merges settings.json using node or python3 (no jq dependency)
 - Session Triggers implemented in CLAUDE.md (reloaded every turn), NOT via UserPromptSubmit hook — simpler, version-controlled, no settings.json changes needed
 - SessionStart hook stays as-is; Session Triggers are a separate layer on top
+- Claude Code SessionStart hooks require `type: "command"`, not `type: "prompt"` — use a .ps1/.sh script to emit `hookSpecificOutput` JSON with `additionalContext`
+- Cast Get-Content to `[string]` before ConvertTo-Json — PSObject note-properties (PSPath, PSDrive, etc.) otherwise expand into hundreds of KB
 
 ## What We Are NOT Doing Yet
 - Web UI or dashboard
@@ -50,19 +52,26 @@ install.ps1      → One-command PowerShell installer (Windows)
 
 ## Last Session Summary
 
-**Session 2026-04-07**
+**Session 2026-04-07 (second)**
 
-Three things happened this session:
+Investigated and fixed the "SessionStart:startup hook error" that appeared on every Claude Code launch.
 
-1. Brutal-critic audit — ran brutal-critic against this repo. Found 8 bugs. All catalogued in docs/next-session.md under "Bugs Found by Brutal Critic (2026-04-07)". Key findings: install scripts overwrite hooks instead of merging, README describes old personality names, deepseek.sh suppresses stderr in violation of a CLAUDE.md decision, session-closer uses `git add -A` (data exposure risk), hook prompt text is duplicated in three places out of sync.
+Root cause: ~/.claude/settings.json had a SessionStart hook with `"type": "prompt"`, which is not a valid Claude Code hook type. Only `"type": "command"` is supported. The harness rejected it at startup silently with the error banner.
 
-2. Session Triggers feature — added a `## Session Triggers` block to CLAUDE.md. This makes Claude detect greetings and goodbyes at any point in the conversation (not just SessionStart) and run session-opener or session-closer automatically. Includes a mid-session guard: if a greeting arrives when context is already loaded, Claude offers the user a `/clear` option instead of silently re-briefing. This was the first real implementation — what the user thought was already working in another project was only the one-shot SessionStart hook.
+Fix (all in ~/.claude/, outside the repo — no repo files changed this session):
+- Created ~/.claude/session-start-context.txt — holds the briefing instruction prose
+- Created ~/.claude/session-start-hook.ps1 — reads the context file and emits `hookSpecificOutput` JSON with `additionalContext`
+- Edited ~/.claude/settings.json — converted hook to `type: "command"` pointing at the .ps1
 
-3. init-project propagation — mirrored the Session Triggers block into commands/init-project.md so every new project bootstrapped via /init-project gets the behavior automatically. Also updated the "if CLAUDE.md already exists" branch to inject the section if missing.
+Two bugs were caught during testing before declaring done:
+1. `Get-Content -Raw` attached PSObject note-properties (PSPath, PSDrive, etc.) that ConvertTo-Json expanded into a 374KB blob. Fixed with `[string]` cast.
+2. Em-dash mojibake from system codepage. Fixed with `-Encoding utf8`.
 
-Decision: CLAUDE.md is reloaded every turn by the harness, making it the right place for continuous trigger logic. No UserPromptSubmit hook needed.
+Script now produces clean single-string `additionalContext` JSON. Hook fix is Windows-only (PowerShell), but lives in personal ~/.claude/ so it has zero impact on Linux/Mac users installing MAISMS.
 
-No push this session — user wants to exit and test fresh-session trigger behavior before pushing to GitHub.
+Decisions: Claude Code SessionStart hooks only support `type: "command"`; the prose-in-.txt / script-wraps-to-JSON / settings-points-at-script pattern is clean and recommended for Windows; always cast Get-Content to [string] before ConvertTo-Json.
+
+Next immediate step: quit and relaunch Claude Code to confirm the error banner is gone.
 
 ---
 
@@ -70,7 +79,18 @@ No push this session — user wants to exit and test fresh-session trigger behav
 
 At the start of your session, read this file fully. Then check if CLAUDE.md or docs/next-session.md have newer information.
 
-At the END of your session, update the relevant section below before closing.
+**When you start working:**
+1. Write `WORKING.md` in the project root with your name, the current time, and what you're focused on:
+   ```
+   AI: DeepSeek
+   Started: [date and time]
+   Focus: [what you're working on]
+   ```
+2. If `WORKING.md` already exists with another AI's name and a recent timestamp (same day), stop and tell the user: another AI may be in an active session. Ask whether to proceed or coordinate first.
+
+**When you finish working:**
+1. Update the `## Last DeepSeek Session` section below with a summary of what you did.
+2. Delete `WORKING.md` from the project root.
 
 ## Last Gemini Session
 _Not yet used_

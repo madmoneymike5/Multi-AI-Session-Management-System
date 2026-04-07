@@ -2,9 +2,10 @@
 
 ## Current Priority
 
-1. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer).
-2. Fix the 9 brutal-critic bugs queued below.
-3. Test install scripts on a clean machine.
+1. Quit and relaunch Claude Code — verify "SessionStart:startup hook error" is gone and the new briefing context appears cleanly.
+2. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer).
+3. Fix the 9 brutal-critic bugs queued below.
+4. Test install scripts on a clean machine.
 
 ---
 
@@ -20,13 +21,22 @@
 - [x] Implemented Session Triggers in CLAUDE.md (greeting/goodbye detection with mid-session guard)
 - [x] Mirrored Session Triggers into commands/init-project.md so new projects inherit the behavior
 - [x] Fixed duplicate Task 1/Task 2 stub in next-session.md
+- [x] Fixed "SessionStart:startup hook error" on Windows — converted invalid `type: prompt` hook to `type: command` via ~/.claude/session-start-hook.ps1; fixed PSObject bloat and em-dash mojibake bugs during testing
 
 ---
 
 ## Work Queue
 
-### Task 0 — Test Session Triggers on a fresh session restart (IMMEDIATE)
-> Exit Claude, start a new session in this repo, and greet Claude with "good morning" or "hi".
+### Task 0a — Verify SessionStart hook fix (IMMEDIATE — do this first)
+> Quit Claude Code and relaunch it in this repo. Verify:
+> - The "SessionStart:startup hook error" banner is gone
+> - The briefing context (from ~/.claude/session-start-context.txt) appears in Claude's initial context
+> - No 374KB JSON blobs or mojibake in the hook output
+>
+> If still broken: check ~/.claude/settings.json has `"type": "command"` (not `"type": "prompt"`) and the `command` field points to `pwsh -File ~/.claude/session-start-hook.ps1`.
+
+### Task 0b — Test Session Triggers on a fresh session restart
+> After verifying Task 0a, greet Claude with "good morning" or "hi".
 > Verify:
 > - session-opener runs automatically
 > - The briefing is delivered before any other response
