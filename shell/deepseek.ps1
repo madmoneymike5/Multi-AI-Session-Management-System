@@ -23,10 +23,10 @@ $context
 """
 "@
         Set-Content -Path $tmpFile -Value $modelfile
-        ollama create $tmpModel -f $tmpFile 2>$null
+        ollama create $tmpModel -f $tmpFile
         Remove-Item $tmpFile -Force
         ollama run $tmpModel
-        ollama rm $tmpModel 2>$null
+        ollama rm $tmpModel
     } else {
         Write-Host "[No DEEPSEEK.md found in current directory -- starting without project context]"
         ollama run $Model

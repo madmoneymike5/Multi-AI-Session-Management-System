@@ -36,7 +36,9 @@ README.md        → Public documentation
 - **Agents are personal, not project-level** — they go in `~/.claude/agents/`, not `.claude/agents/` in any project
 - **Four identical context files** — CLAUDE.md / GEMINI.md / AGENTS.md / DEEPSEEK.md all contain the same project state; session-closer is the source of truth
 - **install.sh uses node or python3 for JSON merging** — avoids requiring `jq` which isn't standard on Windows
-- **--system flag for Ollama** — cleaner than piping stdin; works with all Ollama versions
+- **Ollama uses temp Modelfile (ollama create), not --system flag** — more reliable; --system flag was replaced this session
+- **install.ps1 uses $PROFILE for profile path** — not hardcoded $env:USERPROFILE\Documents, which breaks on OneDrive-synced machines
+- **No 2>$null on ollama calls in PowerShell** — Go-based CLI programs on Windows throw "failed to get console mode for stderr: The handle is invalid" when stderr is redirected to null
 
 ## What We Are NOT Doing
 
@@ -47,12 +49,17 @@ README.md        → Public documentation
 ---
 
 ## Current State
-- Phase: Initial release
+- Phase: Post-release bug fixes
 - Last session: 2026-04-06
-- Status: Repo created, all files written, ready to publish
-- Blocked on: Nothing
+- Status: DeepSeek PowerShell function confirmed working; install.ps1 fixed for OneDrive; ready to push to GitHub
+- Blocked on: Nothing — ready to push and test on clean machine
 
 ## Session History
+
+### Session 2026-04-06 (second)
+- Accomplished: Fixed DeepSeek PowerShell integration — confirmed working end-to-end; fixed install.ps1 profile path for OneDrive; removed 2>$null from ollama calls; created PowerShell profile at correct OneDrive path
+- Decisions: Switch Ollama approach from --system flag to temp Modelfile (ollama create/rm); use $PROFILE not hardcoded path; never redirect stderr to null for Go CLI tools on Windows; SessionStart hook error was transient (no config change needed)
+- Next: Push to GitHub, test install scripts on a clean machine
 
 ### Session 2026-04-06
 - Accomplished: Created full repo structure — agents, commands, shell functions, install scripts (bash + PowerShell), README, AI context files, CLAUDE.md
