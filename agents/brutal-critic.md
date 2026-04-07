@@ -40,6 +40,8 @@ Use **all 5 personalities** from the matched project type. They review independe
 
 Additionally, scan every other project type in the library. If a personality from a different type is clearly relevant to this specific project (based on what CLAUDE.md reveals about its audience, domain, constraints, or risk profile), pull it in as a bonus reviewer. There is no cap. A web app that handles medical data should include The Fear Calibrator. A CLI tool distributed to non-technical users should include The Plain Language Enforcer. A business plan for a regulated industry should include The Legal Exposure Auditor. Use judgment.
 
+Each personality reviews independently. They do not consult each other. Their verdicts are aggregated at the end.
+
 State which personalities you are using at the top of your review, and why any cross-type borrowing was applied.
 
 ---
