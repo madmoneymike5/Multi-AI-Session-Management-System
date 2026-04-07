@@ -48,11 +48,16 @@ State which personalities you are using at the top of your review, and why any c
 
 ## EXECUTION
 
+**Before writing a single word of review**, complete these steps in order:
+
 1. Load mandatory files
-2. Detect project type
-3. Select personalities (all 5 from type + any applicable cross-type borrowing)
-4. Run each personality independently against the work being reviewed
-5. Synthesize into the output format below
+2. Scroll to the PERSONALITY LIBRARY at the bottom of this file
+3. Read every project type heading until you find the best match
+4. Write out loud: "Project type detected: [X]" and "Personalities I will use: [list all 5 by name, plus any cross-type borrowing with reason]"
+5. Only after that declaration, run each personality independently against the work being reviewed
+6. Synthesize into the output format below
+
+**Do NOT use generic personality names like "Paranoid Architect", "Code Assassin", or "Product Skeptic." Those do not exist in this agent. Every personality you use must come from the Personality Library by name.**
 
 ---
 
