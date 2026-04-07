@@ -1,5 +1,5 @@
 # Multi-AI Session Management System — AI Context Briefing
-Last updated: 2026-04-06 by session-closer
+Last updated: 2026-04-07 by session-closer
 
 > **Codex/OpenAI Agents:** This file is loaded automatically. Check `docs/next-session.md` for current priorities.
 > At the END of your session, update the `## Last Codex Session` section at the bottom.
@@ -20,16 +20,17 @@ install.ps1      → One-command PowerShell installer (Windows)
 ```
 
 ## Current State
-- Phase: Post-release bug fixes
-- Last session: 2026-04-06
-- Status: DeepSeek PowerShell function confirmed working; install.ps1 fixed for OneDrive; ready to push to GitHub
-- Blocked on: Nothing — ready to push and test on clean machine
+- Phase: Post-release bug fixes + Session Triggers feature
+- Last session: 2026-04-07
+- Status: Session Triggers added to CLAUDE.md and init-project.md; brutal-critic ran and found 8 bugs all queued in next-session.md; local commit only (no push)
+- Blocked on: Nothing — immediate next step is testing Session Triggers on a fresh session restart
 
 ## What's Next
-1. Push to GitHub and verify README install commands work
-2. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive)
-3. Test install.sh on Linux/macOS
-4. Consider a thin `gemini` shell wrapper (low priority)
+1. Test Session Triggers on a fresh session restart (greeting → session-opener, goodbye → session-closer)
+2. Fix the 8 brutal-critic bugs queued in docs/next-session.md
+3. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive)
+4. Test install.sh on Linux/macOS
+5. Consider a thin `gemini` shell wrapper (low priority)
 
 ## Key Design Decisions (Do Not Revisit Without Good Reason)
 - Agents are personal (`~/.claude/agents/`), not project-level
@@ -38,6 +39,8 @@ install.ps1      → One-command PowerShell installer (Windows)
 - install.ps1 uses `$PROFILE` not hardcoded `$env:USERPROFILE\Documents` — fixes OneDrive setups
 - No `2>$null` on ollama calls in PowerShell — Go CLI programs on Windows break when stderr is redirected to null
 - install.sh merges settings.json using node or python3 (no jq dependency)
+- Session Triggers implemented in CLAUDE.md (reloaded every turn), NOT via UserPromptSubmit hook — simpler, version-controlled, no settings.json changes needed
+- SessionStart hook stays as-is; Session Triggers are a separate layer on top
 
 ## What We Are NOT Doing Yet
 - Web UI or dashboard
@@ -47,21 +50,19 @@ install.ps1      → One-command PowerShell installer (Windows)
 
 ## Last Session Summary
 
-**Session 2026-04-06 (second session)**
+**Session 2026-04-07**
 
-Two bugs in the DeepSeek PowerShell integration were diagnosed and fixed:
+Three things happened this session:
 
-1. SessionStart hook error — determined to be a transient LLM call timeout/network issue. Hook format (matcher/hooks wrapper) is correct per schema. No config change made.
+1. Brutal-critic audit — ran brutal-critic against this repo. Found 8 bugs. All catalogued in docs/next-session.md under "Bugs Found by Brutal Critic (2026-04-07)". Key findings: install scripts overwrite hooks instead of merging, README describes old personality names, deepseek.sh suppresses stderr in violation of a CLAUDE.md decision, session-closer uses `git add -A` (data exposure risk), hook prompt text is duplicated in three places out of sync.
 
-2. install.ps1 profile path bug — was hardcoding `$env:USERPROFILE\Documents\WindowsPowerShell\...` which breaks on OneDrive-synced machines. Fixed to use `$PROFILE` which resolves correctly in all cases.
+2. Session Triggers feature — added a `## Session Triggers` block to CLAUDE.md. This makes Claude detect greetings and goodbyes at any point in the conversation (not just SessionStart) and run session-opener or session-closer automatically. Includes a mid-session guard: if a greeting arrives when context is already loaded, Claude offers the user a `/clear` option instead of silently re-briefing. This was the first real implementation — what the user thought was already working in another project was only the one-shot SessionStart hook.
 
-3. Ollama approach changed — switched from `--system` flag (which was the original design decision) to creating a temporary Modelfile via `ollama create`. This is more reliable.
+3. init-project propagation — mirrored the Session Triggers block into commands/init-project.md so every new project bootstrapped via /init-project gets the behavior automatically. Also updated the "if CLAUDE.md already exists" branch to inject the section if missing.
 
-4. Removed `2>$null` from all `ollama create` and `ollama rm` calls — Go-based programs on Windows throw "failed to get console mode for stderr: The handle is invalid" when stderr is redirected to null. The error was swallowed silently before, now it surfaces properly.
+Decision: CLAUDE.md is reloaded every turn by the harness, making it the right place for continuous trigger logic. No UserPromptSubmit hook needed.
 
-5. Created PowerShell profile at `C:\Users\micha\OneDrive\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` with the working deepseek function.
-
-DeepSeek confirmed working end-to-end.
+No push this session — user wants to exit and test fresh-session trigger behavior before pushing to GitHub.
 
 ---
 

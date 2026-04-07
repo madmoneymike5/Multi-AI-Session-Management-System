@@ -43,6 +43,23 @@ This file provides guidance to Claude Code when working with this repository.
 
 ---
 
+## Session Triggers
+
+These triggers apply at ANY point in the conversation, not just the first message. Re-check on every user turn.
+
+**Greeting trigger → run session-opener (with mid-session guard)**
+If the user's message is a greeting ("good morning", "morning", "hi", "hello", "hey", "good afternoon", "good evening", "I'm back"):
+
+1. **First, check whether you are already mid-session** — i.e., this conversation has substantive prior turns, files have been read, edits have been made, or context has accumulated beyond the initial SessionStart brief.
+2. **If mid-session:** Do NOT silently re-run session-opener. Instead, tell the user: "We're already mid-session — I have context loaded including [one-line summary of what we've been doing]. Want to `/clear` and get a fresh start-of-day briefing, or keep going from here? (You can also abort and just continue.)" Wait for their answer. The user must run `/clear` themselves — you cannot clear context for them. After they clear and greet again, the next turn will be a fresh session and the start-of-session branch below applies.
+3. **If this is genuinely the start of the session** (first or second turn, no real work done yet): launch the `session-opener` agent via the Agent tool, then greet the user in the same response that delivers the brief.
+4. **If session-opener has already run in this conversation** and no new context files have been touched since: just greet back briefly. Don't re-brief.
+
+**End-of-day trigger → run session-closer**
+If the user indicates they are done ("let's close this out", "I'm done for the day", "wrapping up", "goodnight", "see you tomorrow", "that's it for today", "calling it"), launch the `session-closer` agent via the Agent tool. Confirm with the user before any commits or pushes.
+
+---
+
 ## Current State
 <!-- Updated by session-closer each session -->
 - Phase: Project initialization
@@ -59,7 +76,7 @@ This file provides guidance to Claude Code when working with this repository.
 - Next: [first real task]
 ```
 
-**If CLAUDE.md already exists**, add the `## Current State` and `## Session History` sections at the end if they're not already there. Do not modify any existing content.
+**If CLAUDE.md already exists**, add the `## Session Triggers`, `## Current State`, and `## Session History` sections at the end if they're not already there. Do not modify any existing content.
 
 ## Step 3: Create docs/next-session.md
 
