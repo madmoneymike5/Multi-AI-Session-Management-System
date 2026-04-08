@@ -127,11 +127,13 @@ The installer is designed to be safe to run more than once:
 |------|----------|
 | Claude agents (`session-closer`, `session-opener`, `brutal-critic`) | ✅ Always — replaced with the latest version |
 | `/init-project` command | ✅ Always — replaced with the latest version |
-| `deepseek` shell function | ✅ Only if it isn't already in your profile |
+| `deepseek` shell function | ✅ Updated if version is outdated; skipped if already current |
 | Your project files (`CLAUDE.md`, `GEMINI.md`, etc.) | ❌ Never touched |
 | Your git history or any work in your projects | ❌ Never touched |
 
 In other words: the system itself gets upgraded, but nothing inside your actual projects changes. Your work stays exactly as you left it.
+
+> **Note:** The brutal-critic personality library evolves over time. If your critic seems to be using outdated personalities (e.g., "Paranoid Architect", "Code Assassin", "Product Skeptic"), re-run the installer — agents are always replaced with the latest version on reinstall.
 
 ---
 
@@ -143,6 +145,8 @@ In Claude Code, from your project directory:
 /init-project
 ```
 Creates `CLAUDE.md`, `GEMINI.md`, `AGENTS.md`, `DEEPSEEK.md`, `docs/next-session.md`, and the Claude memory directory. All AI tools are briefed from day one.
+
+> **Private repos:** `AGENTS.md`, `GEMINI.md`, and `DEEPSEEK.md` contain session history. If your repo is public and session details are sensitive, add these to `.gitignore`. `CLAUDE.md` is safe to commit — it contains only project guidance.
 
 ### Adding to an existing project
 
@@ -183,7 +187,7 @@ The model argument accepts any model name that `ollama list` shows. You must hav
 ```
 @agent-brutal-critic to roast what we did today
 ```
-Three independent reviewer personalities (Paranoid Architect, Code Assassin, Product Skeptic). Hard to please by design.
+Detects your project type from an ever-growing library (currently 27 types, expanding via Self-Expansion Protocol), selects 5 tailored reviewer personalities, and borrows perspectives across types. Hard to please by design.
 
 ---
 

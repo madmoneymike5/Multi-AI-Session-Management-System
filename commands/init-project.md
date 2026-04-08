@@ -212,6 +212,8 @@ Then create a `.gitignore` appropriate for the tech stack if one doesn't exist.
 
 ## Step 7: Initial Commit
 
+> **Public repos:** `AGENTS.md`, `GEMINI.md`, and `DEEPSEEK.md` contain session history. If your repo is public and session details are sensitive, add these to `.gitignore` before committing. `CLAUDE.md` is safe to commit — it contains only project guidance.
+
 ```bash
 git add CLAUDE.md GEMINI.md AGENTS.md DEEPSEEK.md docs/next-session.md
 git commit -m "[Project Name] — Project initialized with session management system"

@@ -10,7 +10,9 @@
 # How it works: creates a temporary Ollama model with DEEPSEEK.md as the
 # system prompt, runs it interactively, then cleans up the temp model.
 
+# BEGIN deepseek-maisms
 deepseek() {
+  # deepseek v2
   local model="${1:-deepseek-r1:8b}"
   if [ -f "DEEPSEEK.md" ]; then
     echo "[Loading DEEPSEEK.md context for $model...]"
@@ -23,12 +25,15 @@ deepseek() {
       cat DEEPSEEK.md
       printf '\n"""\n'
     } > "$tmp_file"
-    ollama create "$tmp_model" -f "$tmp_file" 2>/dev/null
+    ollama create "$tmp_model" -f "$tmp_file" || { echo "[Error: ollama create failed — is Ollama running and is '$model' pulled?]"; rm -f "$tmp_file"; return 1; }
     rm -f "$tmp_file"
+    trap 'ollama rm "$tmp_model" 2>/dev/null; trap - INT TERM; return 1' INT TERM
     ollama run "$tmp_model"
-    ollama rm "$tmp_model" 2>/dev/null
+    trap - INT TERM
+    ollama rm "$tmp_model"
   else
     echo "[No DEEPSEEK.md found in current directory — starting without project context]"
     ollama run "$model"
   fi
 }
+# END deepseek-maisms

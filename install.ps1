@@ -41,14 +41,21 @@ Write-Host "  OK init-project.md     -> $CommandsDir"
 # 3. Add deepseek function to PowerShell profile
 Write-Host "Adding deepseek function to PowerShell profile..."
 $deepseekFunc = Get-Content "$RepoDir\shell\deepseek.ps1" -Raw
+$currentVersion = (Select-String -Path "$RepoDir\shell\deepseek.ps1" -Pattern "# deepseek-ps1 v" | Select-Object -First 1).Line.Trim()
 $profilePath = $PROFILE
 $profileDir = Split-Path -Parent $profilePath
 New-Item -ItemType Directory -Force -Path $profileDir | Out-Null
 if (Test-Path $profilePath) {
     $existing = Get-Content $profilePath -Raw
-    if ($existing -match "function deepseek") {
-        Write-Host "  OK deepseek already in $profilePath -- skipping"
+    if ($existing.Contains($currentVersion)) {
+        Write-Host "  OK deepseek already current in $profilePath -- skipping"
     } else {
+        if ($existing -match "# BEGIN deepseek-maisms") {
+            Copy-Item $profilePath "$profilePath.bak"
+            $existing = $existing -replace '(?s)# BEGIN deepseek-maisms.*?# END deepseek-maisms\r?\n?', ''
+            Set-Content -Path $profilePath -Value $existing -NoNewline
+            Write-Host "  Replaced stale deepseek() in $profilePath (backup at $profilePath.bak)"
+        }
         Add-Content -Path $profilePath -Value "`n# DeepSeek/Ollama context loader (added by multi-ai-session-management installer)"
         Add-Content -Path $profilePath -Value $deepseekFunc
         Write-Host "  OK deepseek() added to $profilePath"

@@ -37,16 +37,22 @@ echo "  ✓ init-project.md     → $COMMANDS_DIR"
 # 3. Add deepseek function to ~/.bashrc
 echo "Adding deepseek function to ~/.bashrc..."
 BASHRC="$HOME/.bashrc"
-if grep -q "deepseek()" "$BASHRC" 2>/dev/null; then
-  echo "  ✓ deepseek() already present in $BASHRC — skipping"
+CURRENT_VERSION=$(grep "# deepseek v" "$REPO_DIR/shell/deepseek.sh" | head -1)
+if grep -qF "$CURRENT_VERSION" "$BASHRC" 2>/dev/null; then
+  echo "  ✓ deepseek() already current in $BASHRC — skipping"
 else
+  if grep -q "# BEGIN deepseek-maisms" "$BASHRC" 2>/dev/null; then
+    cp "$BASHRC" "$BASHRC.bak"
+    sed -i '/^# BEGIN deepseek-maisms/,/^# END deepseek-maisms/d' "$BASHRC"
+    echo "  ↻ Replaced stale deepseek() in $BASHRC (backup at $BASHRC.bak)"
+  fi
   echo "" >> "$BASHRC"
   echo "# DeepSeek/Ollama context loader (added by multi-ai-session-management installer)" >> "$BASHRC"
   cat "$REPO_DIR/shell/deepseek.sh" >> "$BASHRC"
   echo "  ✓ deepseek() added to $BASHRC"
 fi
 
-# 5. Create ~/.bash_profile if missing
+# 4. Create ~/.bash_profile if missing
 if [ ! -f "$HOME/.bash_profile" ]; then
   cat > "$HOME/.bash_profile" <<'PROFILE'
 # ~/.bash_profile — sources .bashrc for login shells

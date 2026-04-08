@@ -2,9 +2,9 @@
 
 ## Current Priority
 
-1. Test that Session Triggers fire correctly on a fresh session restart (greeting → session-opener, goodbye → session-closer).
-2. Fix the remaining brutal-critic bugs queued below.
-3. Test install scripts on a clean machine.
+1. Test install.ps1 on a clean Windows machine (OneDrive and non-OneDrive setups).
+2. Test install.sh on a fresh Linux or macOS machine.
+3. Consider a `gemini` shell function (thin wrapper to confirm context loaded).
 
 ---
 
@@ -22,20 +22,16 @@
 - [x] Fixed duplicate Task 1/Task 2 stub in next-session.md
 - [x] Fixed "SessionStart:startup hook error" on Windows — converted invalid `type: prompt` hook to `type: command` via ~/.claude/session-start-hook.ps1; fixed PSObject bloat and em-dash mojibake bugs during testing
 - [x] **Removed SessionStart auto-brief hook entirely** (2026-04-07 third session) — the hook fired but `additionalContext` is background context, not an imperative, so the briefing never appeared. Decided the greeting trigger in CLAUDE.md is sufficient and the ~30s launch tax of an always-on hook isn't worth it. Deleted `settings/` dir, hook fragment, hook script, context file; ripped out hook section from install.sh / install.ps1; updated README, CLAUDE.md, agents/session-opener.md, commands/init-project.md. Also retired Bug 1 and Bug 6 from the brutal-critic list — both were about the now-deleted hook code.
+- [x] **Two brutal-critic runs, all 11 bugs fixed or retired** (2026-04-08) — Bugs 2–5, 7, 8 fixed first run; GitHub issues #1–#6 opened and closed second run (deepseek.ps1 $LASTEXITCODE check, sentinel markers + version stamps in PS1/install.ps1, install.sh step numbering, session-closer WORKING.md timing, session-opener date comparison replaced with narrative check, README library description). All AI context files synced. Pushed to GitHub.
 
 ---
 
 ## Work Queue
 
-### Task 0 — Test Session Triggers on a fresh session restart
-> Greet Claude with "good morning" or "hi".
-> Verify:
-> - session-opener runs automatically
-> - The briefing is delivered before any other response
-> - If you greet again mid-session, Claude offers the `/clear` option instead of re-briefing silently
-> - Saying "goodnight" or "I'm done for today" triggers session-closer
->
-> Also test init-project: run `/init-project` on a scratch project and verify the Session Triggers block appears in the generated CLAUDE.md.
+### ~~Task 0~~ — ✅ DONE (2026-04-07 fourth session)
+> Greeting trigger confirmed working: "good morning" → session-opener fired, briefing delivered.
+> Mid-session guard not yet tested (would need a second greeting mid-session).
+> `/init-project` Session Triggers block: not re-tested this session — was verified in session 2026-04-07.
 
 ### Task 1 — Test install.ps1 on a clean Windows machine
 > Run `.\install.ps1` on a Windows machine without anything pre-installed. Verify:
@@ -58,33 +54,27 @@
 > Was: install.sh / install.ps1 overwrite existing SessionStart hooks instead of merging.
 > Resolution: Both installers no longer touch settings.json at all — the SessionStart hook was removed in favor of the greeting trigger in CLAUDE.md.
 
-### Bug 2 — README describes brutal-critic personalities that no longer exist
-> README says "Paranoid Architect, Code Assassin, Product Skeptic." Those names were replaced by the 27-type Personality Library. Public docs lie about actual behavior.
-> Fix: Update README to describe the real system: project type detection, personality library, cross-type borrowing.
+### ~~Bug 2~~ — ✅ FIXED (2026-04-07 fourth session)
+> README updated to describe real system: 27-type library, 5 tailored personalities, cross-type borrowing.
 
-### Bug 3 — deepseek.sh suppresses stderr on ollama calls (violates CLAUDE.md decision)
-> Lines 26 and 29 use `2>/dev/null` on `ollama create` and `ollama rm`. CLAUDE.md explicitly documents not doing this. A failed `ollama create` silently produces a missing model, then `ollama run` fires against it with a confusing error.
-> Fix: Remove `2>/dev/null`. Add explicit failure check: if `ollama create` fails, print a useful error and return 1.
+### ~~Bug 3~~ — ✅ FIXED (2026-04-07 fourth session)
+> Removed `2>/dev/null` from `ollama create` and `ollama rm`. Added `||` error check on `ollama create` with a diagnostic message and early return.
 
-### Bug 4 — install.sh won't update an existing deepseek() function
-> Greps for function name presence only — so reinstalling after a bug fix won't update an already-installed version. Old broken function stays in ~/.bashrc forever.
-> Fix: Version-stamp the function (e.g., `# deepseek v2`) and grep for the stamp, not just the name.
+### ~~Bug 4~~ — ✅ FIXED (2026-04-07 fourth session)
+> Added `# deepseek v2` stamp to `deepseek.sh`. `install.sh` now greps for the stamp instead of `deepseek()`, and uses `sed` to remove a stale old-version block before appending the new one.
 
-### Bug 5 — session-closer.md uses `git add -A`
-> Stages everything in the working directory including secrets, .env files, and debug artifacts. The agent runs in users' actual project directories — this is a data exposure risk.
-> Fix: Replace with an explicit file list: `git add CLAUDE.md GEMINI.md AGENTS.md DEEPSEEK.md docs/next-session.md WORKING.md`
+### ~~Bug 5~~ — ✅ FIXED (2026-04-07 fourth session)
+> Replaced `git add -A` with explicit list: `git add CLAUDE.md GEMINI.md AGENTS.md DEEPSEEK.md docs/next-session.md`. Added inline comment to add other session-managed files if needed.
 
 ### ~~Bug 6~~ — RETIRED 2026-04-07 (third session)
 > Was: hook prompt text hardcoded in three places (install.sh, install.ps1, settings/hook-fragment.json) with no single source of truth.
 > Resolution: All three locations were deleted along with the hook itself. There is no hook prompt anymore.
 
-### Bug 7 — GEMINI.md / AGENTS.md / DEEPSEEK.md have stale "ready to push" state
-> These context files still say "ready to push to GitHub" — the push is done. This is the sync failure this system exists to prevent, happening in its own repo.
-> Fix: Run session-closer on this repo to sync all three context files.
+### ~~Bug 7~~ — ✅ FIXED (2026-04-08)
+> GEMINI.md / AGENTS.md / DEEPSEEK.md were stale. Resolved by running session-closer which synced all three context files with the current state.
 
-### Bug 8 — init-project commits AGENTS.md to user project repos with no warning
-> AGENTS.md contains session history, architecture decisions, and project state. It goes into public git history of every project using /init-project. Silent information disclosure for proprietary projects.
-> Fix: Warn users in init-project.md and README.md. Suggest adding AGENTS.md to .gitignore for private projects.
+### ~~Bug 8~~ — ✅ FIXED (2026-04-07 fourth session)
+> Added private-repo warning to both `README.md` (after "Starting a new project") and `commands/init-project.md` (after Step 6). Warns that `AGENTS.md`, `GEMINI.md`, `DEEPSEEK.md` contain session history and should be `.gitignore`d in public repos.
 
 ---
 

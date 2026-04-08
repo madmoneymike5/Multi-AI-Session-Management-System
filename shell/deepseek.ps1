@@ -9,7 +9,9 @@
 # How it works: creates a temporary Ollama model with DEEPSEEK.md as the
 # system prompt, runs it interactively, then cleans up the temp model.
 
+# BEGIN deepseek-maisms
 function deepseek {
+    # deepseek-ps1 v2
     param([string]$Model = "deepseek-r1:8b")
     if (Test-Path "DEEPSEEK.md") {
         $context = Get-Content "DEEPSEEK.md" -Raw
@@ -24,6 +26,11 @@ $context
 "@
         Set-Content -Path $tmpFile -Value $modelfile
         ollama create $tmpModel -f $tmpFile
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "[Error: ollama create failed — is Ollama running and is '$Model' pulled?]"
+            Remove-Item $tmpFile -Force -ErrorAction SilentlyContinue
+            return
+        }
         Remove-Item $tmpFile -Force
         ollama run $tmpModel
         ollama rm $tmpModel
@@ -32,3 +39,4 @@ $context
         ollama run $Model
     }
 }
+# END deepseek-maisms

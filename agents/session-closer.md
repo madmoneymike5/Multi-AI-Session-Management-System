@@ -139,8 +139,17 @@ DEFAULT_BRANCH=<current branch>
 
 ## 6. Git Commit & Push
 
+Delete `WORKING.md` from the project root now, before staging. If it appears in `git status`, also run `git rm WORKING.md` to stage the deletion:
+
 ```bash
-git add -A
+rm -f WORKING.md           # delete the session signal file
+git rm WORKING.md 2>/dev/null || true   # stage deletion if it was previously committed
+```
+
+```bash
+git add CLAUDE.md GEMINI.md AGENTS.md DEEPSEEK.md docs/next-session.md GIT_REMOTE
+# If your project added other session-managed files this session, add them here too.
+# (GIT_REMOTE was written in Step 5 — skip it only if no remote was configured.)
 git commit -m "[Project Name] - Session [DATE]
 
 Decisions:
@@ -155,8 +164,6 @@ After committing, ask the user: **"Ready to push to GitHub? Say yes to push now,
 
 - If yes: run `git push`. If it fails because no remote is configured, report the error clearly and provide the `gh repo create` command to fix it. Do not fail silently.
 - If no: skip the push and note it in the confirmation message.
-
-Then delete `WORKING.md` from the project root.
 
 ## 7. Deliver Confirmation
 

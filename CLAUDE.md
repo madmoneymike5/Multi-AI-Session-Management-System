@@ -67,11 +67,16 @@ These triggers exist because this repo IS the session management system — it m
 
 ## Current State
 - Phase: Post-release bug fixes + simplification
-- Last session: 2026-04-07 (third)
-- Status: Removed the SessionStart auto-brief hook entirely from both personal `~/.claude/` and the repo. Briefing now happens only via the greeting trigger in this file. Bug 1 and Bug 6 from the brutal-critic list retired (both were about hook code that no longer exists). 7 brutal-critic bugs still queued. No push.
-- Blocked on: Nothing
+- Last session: 2026-04-08
+- Status: Two brutal-critic runs completed. All 11 bugs from the brutal-critic queue have been fixed or retired. GitHub issues #1–#6 opened and closed. Context files synced. Pushed to GitHub.
+- Blocked on: Nothing — remaining work is clean-machine install testing
 
 ## Session History
+
+### Session 2026-04-08
+- Accomplished: Two brutal-critic runs. All 11 brutal-critic bugs from the queue fixed or retired. First run (5 bugs): README personality names updated to describe 27-type library; deepseek.sh had 2>/dev/null removed and || error check added on ollama create; deepseek.sh + install.sh gained # deepseek v2 version stamp, sentinel markers (# BEGIN/END deepseek-maisms), dynamic version detection, and sed removal of stale blocks with .bashrc.bak backup; session-closer.md replaced git add -A with explicit file list; README.md + commands/init-project.md gained private-repo warning about AI context files in public repos. Second run (6 bugs, GitHub issues #1–#6 all closed): deepseek.ps1 gained $LASTEXITCODE check after ollama create; deepseek.ps1 + install.ps1 gained # deepseek-ps1 v2 stamp, sentinel markers, dynamic version detection, profile backup, and regex block removal on upgrade; install.sh step numbering gap fixed (# 5. → # 4.); session-closer.md moved WORKING.md deletion to before commit and added git rm staging step; session-opener.md replaced unparseable date comparison with narrative ## Last [AI] Session check; README.md updated "27-type library" to "ever-growing library (currently 27 types, expanding via Self-Expansion Protocol)". Bug 7 (stale context files) resolved by this session-closer run.
+- Decisions: Sentinel marker pattern (# BEGIN/END deepseek-maisms) chosen over function-name grep for safe idempotent upgrades; dynamic version detection (grep from source file) instead of hardcoded string — one source of truth; session-opener AI-activity check now reads narrative summaries, not fragile date strings; all 11 brutal-critic bugs closed.
+- Next: Clean-machine install testing (install.ps1 on Windows, install.sh on Linux/macOS); consider gemini shell function.
 
 ### Session 2026-04-07 (third)
 - Accomplished: Diagnosed why the SessionStart hook fired without error but produced no briefing — `additionalContext` from a hook is delivered as background context, not as a reliable imperative for the model. Decided to remove the hook entirely rather than try to make it more imperative. Deleted `~/.claude/session-start-hook.ps1`, `~/.claude/session-start-context.txt`, and the SessionStart block from `~/.claude/settings.json`. In the repo: deleted `settings/` directory (hook fragment, hook script, context file), ripped out the hook installation section from both `install.sh` and `install.ps1`, dropped the `node`/`python3` prerequisite line from README, updated the README feature table / install tree / update table / daily workflow / manual install / repo structure / prerequisites sections, updated `agents/session-opener.md` description, updated `commands/init-project.md` boilerplate output, retired Bug 1 and Bug 6 from `docs/next-session.md`.

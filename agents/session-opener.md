@@ -25,10 +25,7 @@ To find the current project slug: it's the directory name of cwd, URL-encoded. F
 If `WORKING.md` exists in the project root, read it. If the AI listed is not Claude and the timestamp is from today, include a prominent warning in the brief.
 
 **Check for recent updates from other AIs:**
-Check if `GEMINI.md`, `AGENTS.md`, or `DEEPSEEK.md` exist in the project root. If any do:
-- Compare their `Last updated:` date to the most recent Session History date in CLAUDE.md
-- If an AI context file was updated MORE RECENTLY than the last Claude session (meaning Gemini, Codex, or DeepSeek did work after Claude last ran), flag it: "⚠️ GEMINI.md was updated after your last session — Gemini may have made changes. Review before continuing."
-- Also check the `## Last [AI] Session` section at the bottom of each file for a written summary of what that AI did.
+Check if `GEMINI.md`, `AGENTS.md`, or `DEEPSEEK.md` exist in the project root. For each that exists, read the `## Last [AI] Session` section at the bottom of the file. If it contains content other than `_Not yet used_`, flag it in the brief: "⚠️ [AI name] last session: [one-line summary from their session section]."
 
 ## 3. Deliver the Brief
 
