@@ -1,0 +1,4 @@
+checker_commit = "725296b313128355189638ceff2e0f65d12db636"
+limit = 300
+include = ["**/*.py", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.go", "**/*.rs", "**/*.java", "**/*.c", "**/*.h", "**/*.cpp", "**/*.hpp", "**/*.cc", "**/*.sh", "**/*.sql", "**/*.rb", "**/*.php", "**/*.swift", "**/*.kt", "**/*.kts", "**/*.css", "**/*.html", "**/*.vue"]
+exclude = ["tests/fixtures/**", "testdata/**", "docs/generated/**", "store/**"]
