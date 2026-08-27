@@ -103,7 +103,7 @@ Note: `WORKING.md` is a soft signal, not a hard lock. If two AIs truly need to w
 _Not yet used_
 
 ## Last Codex Session
-_Not yet used_
+2026-08-27: Added the shared SoC policy, tracked local hooks, pinned CI workflow, and repository enrollment; verified the checker, Codex hook, and Pi extension.
 
 ## Last DeepSeek Session
 _Not yet used_
