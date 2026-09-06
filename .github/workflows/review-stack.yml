@@ -16,3 +16,6 @@ jobs:
       native-command: >-
         git diff --check
       central-ref: v1
+      opengrep-excludes: ""
+      gitleaks-excludes: |-
+        
