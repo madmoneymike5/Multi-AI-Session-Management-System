@@ -102,3 +102,21 @@ These triggers exist because this repo IS the session management system — it m
 - Accomplished: Created full repo structure — agents, commands, shell functions, install scripts (bash + PowerShell), README, AI context files, CLAUDE.md
 - Decisions: Use --system flag for Ollama (cleaner than pipe); install.sh handles JSON merge with node/python3 fallback; README credits NetworkChuck
 - Next: Create GitHub repo, push, verify install scripts work on a clean machine
+
+## Development Workflow
+
+**Spec:** See `~/.claude/docs/specs/` for the full design document.
+**Full guidance:** Use `/dev-workflow` slash command in any session.
+
+### Non-negotiable rules
+- Never commit directly to `main` — always use a branch
+- Branch naming: `{type}/{issue-number}-{short-description}` (e.g., `fix/7-login-bug`)
+- Commit format: `type(scope): description — closes #N` (lowercase, present tense)
+- Every issue must have one `type:` label and one `priority:` label before work starts
+
+### Definition of done
+An issue is closed when:
+- [ ] Change works as described in the issue
+- [ ] No new errors in terminal/console/logs
+- [ ] Commit references issue with `closes #N`
+- [ ] PR merged to `main`, branch deleted
